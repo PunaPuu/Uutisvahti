@@ -15,19 +15,30 @@ export function decodeEntities(s) {
   })
 }
 
-// Raw element content -> text: CDATA unwrapped, entities decoded.
+// CDATA sections and comments are taken out of the XML before it is split into
+// items, so text inside them (for example "</item>" in a blog post's HTML) can
+// never end an item early or create a fake one. Each CDATA section is replaced
+// by a placeholder "\u0000<n>\u0000" and put back as plain text by rawText().
+const MARK = /\u0000(\d+)\u0000/g
+let cdata = []
+
+function mask(xml) {
+  cdata = []
+  return xml
+    .replace(/\u0000/g, '')
+    .replace(/<!\[CDATA\[([\s\S]*?)(?:\]\]>|$)/g, (_, c) => `\u0000${cdata.push(c) - 1}\u0000`)
+    .replace(/<!--[\s\S]*?(?:-->|$)/g, '')
+}
+
+// Raw element content -> text: CDATA put back, entities decoded outside CDATA.
 function rawText(s) {
   let out = ''
-  let i = 0
-  while (i < s.length) {
-    const c = s.indexOf('<![CDATA[', i)
-    if (c === -1) { out += decodeEntities(s.slice(i)); break }
-    out += decodeEntities(s.slice(i, c))
-    const end = s.indexOf(']]>', c + 9)
-    out += end === -1 ? s.slice(c + 9) : s.slice(c + 9, end)
-    i = end === -1 ? s.length : end + 3
+  let last = 0
+  for (const m of s.matchAll(MARK)) {
+    out += decodeEntities(s.slice(last, m.index)) + (cdata[Number(m[1])] ?? '')
+    last = m.index + m[0].length
   }
-  return out
+  return out + decodeEntities(s.slice(last))
 }
 
 // HTML (from a description) -> one line of plain text.
@@ -78,7 +89,8 @@ function summary(text) {
 }
 
 /** Parse RSS or Atom XML into raw entries {guid, title, link, date, categories, summary}. */
-export function parseFeed(xml) {
+export function parseFeed(input) {
+  const xml = mask(input)
   const isAtom = /<feed[\s>]/.test(xml) && !/<rss[\s>]/.test(xml)
   if (isAtom) {
     return blocks(xml, 'entry').map((b) => {

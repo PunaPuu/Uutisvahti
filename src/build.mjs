@@ -13,15 +13,17 @@
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { FEEDS, fetchFeed } from './feeds.mjs'
+import { FEEDS, MAX_BYTES, fetchFeed, readLimited } from './feeds.mjs'
 import { parseFeed } from './parse.mjs'
-import { classifyProduct, classifyStatus } from './classify.mjs'
+import { PRODUCTS, STATUSES, classifyProduct, classifyStatus } from './classify.mjs'
 import { dedupe, itemId } from './dedupe.mjs'
 import { feedEnabled, isAlert, keep, loadRules } from './rules.mjs'
 import { sendAlerts } from './notify.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const MAX_CATEGORIES = 8
+const MAX_TEXT = 500
+const DAY = 86_400_000
 
 function safeLink(link) {
   try {
@@ -55,6 +57,44 @@ export function toItems(entries, feed, rules) {
   return out
 }
 
+const isoOrNull = (v) => {
+  if (typeof v !== 'string') return null
+  const t = Date.parse(v)
+  return Number.isNaN(t) ? null : new Date(t).toISOString()
+}
+const text = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '')
+const FEED_IDS = new Set(FEEDS.map((f) => f.id))
+
+/**
+ * Items read back from the previously published items.json are untrusted:
+ * keep only well-formed ones, with every field re-checked, and the id
+ * recomputed from the (https-only) link.
+ */
+export function cleanPrevious(items) {
+  if (!Array.isArray(items)) return null
+  const out = []
+  for (const i of items) {
+    if (!i || typeof i !== 'object') continue
+    const link = safeLink(i.link)
+    const title = text(i.title, MAX_TEXT).trim()
+    const seen = isoOrNull(i.seen)
+    if (!link || !title || !seen || !FEED_IDS.has(i.source)) continue
+    out.push({
+      id: itemId(link),
+      title,
+      link,
+      date: isoOrNull(i.date),
+      source: i.source,
+      product: PRODUCTS.includes(i.product) ? i.product : 'Other',
+      status: STATUSES.includes(i.status) ? i.status : 'Announcement',
+      summary: text(i.summary, MAX_TEXT),
+      categories: Array.isArray(i.categories) ? i.categories.filter((c) => typeof c === 'string').slice(0, MAX_CATEGORIES).map((c) => c.slice(0, 100)) : [],
+      seen,
+    })
+  }
+  return out
+}
+
 /**
  * Merge fresh items with the previous run's items.
  * - keeps `seen` (first time we saw the item) from the previous run
@@ -69,9 +109,13 @@ export function merge(fresh, previous, { now, keepDays }) {
     byId.set(it.id, { ...it, seen: prevById.get(it.id)?.seen ?? now })
   }
   for (const it of previous ?? []) if (!byId.has(it.id)) byId.set(it.id, it)
-  const cutoff = new Date(now).getTime() - keepDays * 86_400_000
-  const all = [...byId.values()].filter((i) => new Date(i.date ?? i.seen).getTime() >= cutoff)
-  all.sort((a, b) => (b.date ?? b.seen).localeCompare(a.date ?? a.seen))
+  const nowMs = new Date(now).getTime()
+  const cutoff = nowMs - keepDays * DAY
+  const all = [...byId.values()]
+    // A date more than a day in the future is wrong; fall back to first-seen so it can't pin itself to the top.
+    .map((i) => (i.date && Date.parse(i.date) > nowMs + DAY ? { ...i, date: null } : i))
+    .filter((i) => new Date(i.date ?? i.seen).getTime() >= cutoff)
+  all.sort((a, b) => String(b.date ?? b.seen).localeCompare(String(a.date ?? a.seen)))
   return dedupe(all)
 }
 
@@ -86,8 +130,8 @@ async function loadPrevious(siteUrl, fetchImpl) {
   const res = await fetchImpl(siteUrl.replace(/\/$/, '') + '/items.json', { signal: AbortSignal.timeout(30_000) })
   if (res.status === 404) return null
   if (!res.ok) throw new Error(`previous items.json: HTTP ${res.status}`)
-  const data = await res.json()
-  return Array.isArray(data.items) ? data.items : null
+  const data = JSON.parse(await readLimited(res, MAX_BYTES))
+  return cleanPrevious(data?.items)
 }
 
 export async function build({ offline = false, out = 'site', env = process.env, fetchImpl = fetch, log = console, now = new Date().toISOString() } = {}) {

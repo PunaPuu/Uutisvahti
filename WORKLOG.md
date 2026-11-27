@@ -69,6 +69,40 @@ Newest entries are at the bottom of each phase. Update this as you go, not only 
 - The "Show more" button showed even when hidden, because `.more { display: block }` beat the `hidden` attribute. Added `[hidden] { display: none !important; }` on branch `korjaus-hidden` (VIHREÄ 2/2).
 
 ### Open decisions
-- Merge `korjaus-hidden`: waiting for the user.
 - The real ntfy push isn't checked yet. It will show with the first new alert, or with a test the user sends from the ntfy app.
-- Kit agent reviews (Phase 3, step 4) haven't run yet.
+
+## Phase 3: Reviews and fixes (2026-11-27, branch `korjaus-hidden`)
+
+### Reviews run
+- **security-scanner:** PASS. 71 files, 0 findings, and the git guard is installed. The 3 app icons can't be scanned for text; they are drawn shapes.
+- **gdpr-reviewer:** LOW and informational only. No cookies, analytics or outside scripts. Marks stay in the browser. Fixtures are made up. Commits carry only the noreply email.
+- **vulnerability-reviewer:** 1 MEDIUM, 4 LOW, nothing high or critical.
+- **ux-reviewer** and **basic-user:** several problems using the page on a phone (below).
+
+### Fixes
+- **Security:**
+  - **MEDIUM, feed parser.** CDATA and comments are now taken out before items are split, so `</item>` inside a post can't end an item early or add a fake one. NUL characters are removed, so the placeholders can't be forged. Two tests added.
+  - **Previous `items.json` is untrusted.** `cleanPrevious()` re-checks every field, keeps https links only, recomputes the id from the link, and drops broken items. Dates more than a day in the future fall back to the first-seen time. Sorting can't crash on bad values. Tests added.
+  - **Size limit.** Feeds and the previous `items.json` are read with a 20 MB limit (`readLimited`). Test added.
+  - **Preview server.** `scripts/preview.mjs` answers 400 to a malformed address instead of crashing.
+  - **Accepted:** framing by other sites. GitHub Pages can't send `frame-ancestors`, and nothing important can be changed through a frame.
+- **Usability and accessibility:**
+  - "Show more" shows only when there is more, with the remaining count. The list ends with "That's everything – N stories".
+  - On the phone, the filter chips wrap, so all of them are visible. The two filter rows are labelled "Product" and "Status", and status names are spelled out ("Generally available"). "M365" now reads "Microsoft 365", and "Other" explains what it holds.
+  - A result count shows with the active filters, plus "Clear filters" above the list and in the empty state. Empty states name the filter that caused them.
+  - "Mark these N as read" now has an 8-second Undo, and focus moves to Undo. Each story has its own mark read/unread button.
+  - Unread stories have a "New" label and a coloured left edge.
+  - Only the title and tabs stay pinned (100 px instead of 225 px). `scroll-padding-top` keeps keyboard focus clear of the header. A "Skip to stories" link was added.
+  - The page follows the iPhone text-size setting (`-apple-system-body`). Tap targets are 40–44 px. The star has stronger contrast in light mode, the placeholder has stronger contrast in dark mode, and the Save button keeps one label.
+  - "Updated today 13:16" now shows the day. There is a one-line description under the title and a privacy line in the footer.
+- Checked in the browser pane at 375 px, in light and dark: filters, counts, clear, mark-all with undo, per-story read/unread, empty states, no sideways scroll.
+
+### Check results
+- `node tools/tarkista.mjs`: **TULOS: VIHREÄ 2/2**. 27 unit tests.
+
+### Problems and fixes
+- The preview served the old built copy of the page. Fixed by copying `public/` into the preview folder before testing.
+
+### Open decisions
+- Merge `korjaus-hidden`: waiting for the user.
+- Not done, both LOW: highlighting search matches, and a SharePoint item tagged Copilot because its feed categories include Copilot.

@@ -149,3 +149,41 @@ test('notify: refuses bad topics and non-https servers without sending', async (
   assert.match((await sendAlerts(a, { topic: TOPIC, server: 'http://ntfy.example.test', fetchImpl: f })).reason, /https/)
   assert.equal(sent, 0)
 })
+
+test('cleanPrevious drops malformed items and re-checks every field', async () => {
+  const { cleanPrevious } = await import('../src/build.mjs')
+  const good = { id: 'whatever', title: 'T', link: 'https://example.test/t', date: '2026-11-20T00:00:00Z', seen: '2026-11-20T00:00:00Z', source: 'azure-updates', product: 'Azure', status: 'GA', summary: 's', categories: ['a', 5] }
+  const out = cleanPrevious([
+    good,
+    { ...good, link: 'javascript:alert(1)' },
+    { ...good, link: 'http://example.test/x' },
+    { ...good, seen: 12345 },
+    { ...good, source: 'evil' },
+    { ...good, title: '' },
+    null, 'str',
+    { ...good, link: 'https://example.test/u', product: 'Hacked', status: 'Pwned', date: { x: 1 } },
+  ])
+  assert.equal(out.length, 2)
+  assert.notEqual(out[0].id, 'whatever')
+  assert.deepEqual(out[0].categories, ['a'])
+  assert.equal(out[1].product, 'Other')
+  assert.equal(out[1].status, 'Announcement')
+  assert.equal(out[1].date, null)
+  assert.equal(cleanPrevious({ not: 'array' }), null)
+})
+
+test('merge: future dates fall back to first-seen; non-string dates do not crash', () => {
+  const out = merge([], [
+    { id: 'f', title: 'Future', link: 'https://example.test/f', date: '2099-01-01T00:00:00Z', seen: '2026-11-26T00:00:00Z' },
+    { id: 'n', title: 'Now', link: 'https://example.test/n', date: '2026-11-27T09:00:00Z', seen: '2026-11-27T09:00:00Z' },
+  ], { now: NOW, keepDays: 90 })
+  assert.deepEqual(out.map((i) => i.id), ['n', 'f'])
+  assert.equal(out[1].date, null)
+})
+
+test('readLimited refuses oversized responses', async () => {
+  const { readLimited } = await import('../src/feeds.mjs')
+  assert.equal(await readLimited(new Response('hello'), 10), 'hello')
+  await assert.rejects(readLimited(new Response('x'.repeat(50)), 10), /too large/)
+  await assert.rejects(readLimited(new Response('x', { headers: { 'content-length': '999' } }), 10), /too large/)
+})

@@ -9,7 +9,13 @@ const port = Number(process.env.UV_PORT) || 8080
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.webmanifest': 'application/manifest+json' }
 
 createServer(async (req, res) => {
-  const path = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
+  let path
+  try {
+    path = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
+  } catch {
+    res.writeHead(400).end('Bad request')
+    return
+  }
   const file = normalize(join(root, path.endsWith('/') ? path + 'index.html' : path))
   if (file !== root && !file.startsWith(root + sep)) { res.writeHead(403).end(); return }
   try {
