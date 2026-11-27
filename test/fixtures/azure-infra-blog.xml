@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>Azure Infrastructure Blog (fixture, Atom)</title><id>urn:example:fixture</id><updated>2026-11-26T08:00:00Z</updated>
+<entry><id>urn:example:1</id><title type="html">Example: VM sizes &amp;amp; more now available</title><link rel="alternate" href="https://techcommunity.microsoft.com/blog/azureinfrastructureblog/example-vm-sizes/3"/><updated>2026-11-26T08:00:00Z</updated><category term="Virtual Machines"/><summary type="html">&lt;p&gt;Example new VM sizes.&lt;/p&gt;</summary></entry>
+<entry><id>urn:example:2</id><title>Example: Azure Infrastructure duplicate of Azure Blog</title><link href="https://azure.microsoft.com/en-us/blog/example-agents-foundry/"/><updated>2026-11-24T15:00:00Z</updated><summary>Same post as on the Azure Blog.</summary></entry>
+</feed>

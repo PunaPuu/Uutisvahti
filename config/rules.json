@@ -1,0 +1,25 @@
+{
+  "_help": "Shared rules for Uutisvahti. Edit on GitHub (also from the phone); the next hourly run uses them. Matching is case-insensitive and looks at the title, summary and categories.",
+  "keepDays": 90,
+  "feeds": {
+    "azure-updates": true,
+    "m365-roadmap": true,
+    "azure-blog": true,
+    "copilot-blog": true,
+    "microsoft-blog": true,
+    "m365-dev-blog": true,
+    "techcommunity": false,
+    "azure-infra-blog": true
+  },
+  "include": [
+    "azure", "microsoft 365", "m365", "copilot", "entra", "intune", "defender",
+    "teams", "sharepoint", "onedrive", "exchange", "outlook", "purview",
+    "power platform", "power bi", "fabric", "foundry", "windows", "microsoft graph"
+  ],
+  "exclude": [],
+  "alerts": {
+    "statuses": ["Retiring"],
+    "keywords": ["copilot"],
+    "products": []
+  }
+}
