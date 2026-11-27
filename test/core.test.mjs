@@ -118,3 +118,22 @@ test('keywords match at word starts only', () => {
   assert.ok(hasWord('power bi: new visuals', 'power bi'))
   assert.ok(hasWord('a+b c++ notes', 'c++'))
 })
+
+test('CDATA and comments cannot end an item early or add fake items', () => {
+  const xml = `<rss><channel>
+<item><title>Real</title><link>https://example.test/real</link>
+<description><![CDATA[<p>code: </item><item><title>Fake copilot retirement</title><link>https://evil.example.test/</link></item><item><title>x</p>]]></description></item>
+<!-- </item><item><title>Fake 2</title><link>https://evil.example.test/2</link></item> -->
+</channel></rss>`
+  const items = parseFeed(xml)
+  assert.equal(items.length, 1)
+  assert.equal(items[0].title, 'Real')
+  assert.equal(items[0].link, 'https://example.test/real')
+  assert.match(items[0].summary, /Fake copilot retirement/) // kept only as text
+})
+
+test('NUL characters in a feed cannot forge CDATA placeholders', () => {
+  const xml = '<rss><channel><item><title>A\u00000\u0000B</title><link>https://example.test/a</link><description><![CDATA[secret]]></description></item></channel></rss>'
+  const [a] = parseFeed(xml)
+  assert.equal(a.title, 'A0B')
+})

@@ -24,5 +24,24 @@ export async function fetchFeed(feed, { fetchImpl = fetch } = {}) {
     redirect: 'follow',
   })
   if (!res.ok) throw new Error(`${feed.id}: HTTP ${res.status}`)
-  return await res.text()
+  return await readLimited(res, MAX_BYTES)
+}
+
+// The biggest real feed (M365 Roadmap) is about 3 MB. Anything far larger is
+// broken or hostile, and would only slow the parser down.
+export const MAX_BYTES = 20 * 1024 * 1024
+
+/** Read a response body as text, failing once it passes maxBytes. */
+export async function readLimited(res, maxBytes) {
+  const declared = Number(res.headers.get('content-length'))
+  if (declared > maxBytes) throw new Error(`response too large (${declared} bytes)`)
+  if (!res.body) return ''
+  const chunks = []
+  let size = 0
+  for await (const chunk of res.body) {
+    size += chunk.byteLength
+    if (size > maxBytes) throw new Error(`response too large (over ${maxBytes} bytes)`)
+    chunks.push(chunk)
+  }
+  return new TextDecoder('utf-8').decode(Buffer.concat(chunks))
 }
