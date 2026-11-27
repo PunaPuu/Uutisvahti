@@ -49,4 +49,26 @@ Newest entries are at the bottom of each phase. Update this as you go, not only 
 - npm audit needs a lockfile, so a `package-lock.json` with no dependencies was added.
 
 ### Open decisions
-- Merge to `main`, make the repo public and push: waiting for the user.
+- None. The user approved publishing on 2026-11-27.
+
+## Phase 3: Publish (2026-11-27)
+
+### Done
+- The user set the `NTFY_TOPIC` secret themselves (`gh secret list` shows it).
+- `git` stopped working once Xcode was installed, until the user accepted the Xcode license.
+- Merged `vaihe-1-ydin` into `main` with `--no-ff`. The post-merge backup was made and verified.
+- Checked that the history has only the noreply email. Then made the repo public, pushed `main`, and turned on Pages (source: GitHub Actions).
+- Page: https://punapuu.github.io/Uutisvahti/
+
+### Check results
+- Run 1 (push): tests, build and deploy green. 1147 items from 7/7 feeds. No push, because it was the first run.
+- Run 2 (by hand): it read the previous `items.json`. 1147 items kept their first-seen time and 1 new item was found. It wasn't an alert, so no push was sent.
+- The live page loads on a phone-sized screen with no console errors.
+
+### Problems and fixes
+- The "Show more" button showed even when hidden, because `.more { display: block }` beat the `hidden` attribute. Added `[hidden] { display: none !important; }` on branch `korjaus-hidden` (VIHREÄ 2/2).
+
+### Open decisions
+- Merge `korjaus-hidden`: waiting for the user.
+- The real ntfy push isn't checked yet. It will show with the first new alert, or with a test the user sends from the ntfy app.
+- Kit agent reviews (Phase 3, step 4) haven't run yet.

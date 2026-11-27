@@ -7,8 +7,8 @@ Update this table at each merge to `main`.
 | Phase | State | Date | Checks |
 |---|---|---|---|
 | 0 Setup | done (first commit on `main`) | 2026-11-27 | hooks passed |
-| 1–2 Core, page, push, workflow | done on `vaihe-1-ydin`, waiting for merge | 2026-11-27 | VIHREÄ 2/2 |
-| 3 Publish and review | not started | | |
+| 1–2 Core, page, push, workflow | merged and published | 2026-11-27 | VIHREÄ 2/2 |
+| 3 Publish and review | published; agent reviews not run yet | 2026-11-27 | 2 workflow runs green |
 
 Day-by-day details are in [WORKLOG.md](WORKLOG.md).
 
