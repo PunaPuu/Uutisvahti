@@ -1,0 +1,9 @@
+#!/bin/sh
+# Ajetaan ennen yhdistämiscommitia (git merge). Samat tarkistukset kuin
+# pre-commitissa, jotta mitään ei tule mainiin tarkistamatta.
+. "$(dirname "$0")/yhteiset.sh"
+
+vaadi_tyokalut
+tarkista_lisattavat
+ketjuta_skanneriin pre-commit "$@"
+exit 0

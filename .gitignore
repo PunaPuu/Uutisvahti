@@ -1,0 +1,75 @@
+# Riippuvuudet ja käännökset
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+__pycache__/
+.venv/
+
+# Lokit
+*.log
+
+# Ympäristömuuttujat ja salaisuudet. Vain .env.example kuuluu repoon.
+.env
+.env.*
+!.env.example
+.secret.local
+.runtimeconfig.json
+# npm-asetukset voivat sisältää kirjautumistunnisteen. Asennus: npm ci --ignore-scripts
+.npmrc
+
+# Palvelutilien avaimet ja muut tunnistetiedostot
+*serviceAccount*.json
+*service-account*.json
+*-firebase-adminsdk-*.json
+credentials*.json
+client_secret*.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Viennit oikeista järjestelmistä: niissä voi olla henkilötietoja. Keksitty
+# testiaineisto kuuluu testidata/-kansioon (ensimmäisellä rivillä KEKSITTY).
+*.csv
+*.xlsx
+*.xls
+*.ods
+!testidata/*.csv
+
+# Tarkistusskriptin lokit (node tools/tarkista.mjs)
+.tarkistus/
+
+# Väliaikaiset tiedostot ja testien tulosteet
+tmp/
+temp/
+*.tmp
+*.temp
+coverage/
+test-results/
+playwright-report/
+
+# Kuvakaappaukset: niissä voi näkyä henkilötietoja, eikä tarkistuksia voi ajaa
+# kuvien sisältöön. Sallitut kuvakansiot: tools/projekti.mjs (sallitutKuvakansiot).
+screenshots/
+Screenshot *
+Screen Shot *
+Näyttökuva *
+Kuvakaappaus*
+
+# Työkalut ja käyttöjärjestelmä. Clauden projektiasetukset, hookit, agentit ja
+# komennot kuuluvat repoon; henkilökohtaiset asetukset eivät.
+.claude/*
+!.claude/agents/
+!.claude/commands/
+!.claude/hooks/
+!.claude/settings.json
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Uutisvahti: build output (published by GitHub Actions, never committed)
+site/

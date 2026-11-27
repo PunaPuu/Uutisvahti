@@ -1,0 +1,19 @@
+#!/bin/sh
+# Ajetaan ennen jokaista committia. Estää commitin, jos:
+#   - commit tehtäisiin suoraan main-haaraan (työ tehdään haaroissa)
+#   - muutoksissa on salaisuuksia, henkilötietoja tai kiellettyjä tiedostoja
+#   - projektin omat commit-tarkistukset (yhteiset.sh) löytävät virheitä
+# Lisäksi ajetaan SecurityScannerAppin vahti, jos se on asennettu.
+. "$(dirname "$0")/yhteiset.sh"
+
+vaadi_tyokalut
+
+haara=$(git symbolic-ref --short -q HEAD)
+if [ "$haara" = "main" ] && git rev-parse -q --verify HEAD >/dev/null \
+  && [ ! -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]; then
+  virhe "suora commit main-haaraan. Tee työ haarassa (esim. git switch -c korjaus/nimi) ja yhdistä se, kun node tools/tarkista.mjs on vihreä kahdesti."
+fi
+
+tarkista_lisattavat
+ketjuta_skanneriin pre-commit "$@"
+exit 0

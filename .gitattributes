@@ -1,0 +1,20 @@
+# Rivinvaihdot: kaikki tekstitiedostot LF-muodossa, myös Windowsissa.
+* text=auto eol=lf
+
+# Git-hookit ja shell-skriptit ajetaan sh:lla, ja CRLF rikkoo ne.
+.githooks/* text eol=lf
+*.sh text eol=lf
+
+# PowerShell-skriptit toimivat varmimmin CRLF-muodossa.
+*.ps1 text eol=crlf
+
+# Binääritiedostot
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.bundle binary
+
+# SecurityScannerApp kirjoittaa ohitusluettelonsa Windowsin rivinvaihdoilla.
+.securityscanner-ignore.json text eol=crlf

@@ -1,0 +1,9 @@
+#!/bin/sh
+# Estää jokaisen pushin, ellei etärepoa ole erikseen sallittu tiedostossa
+# tools/projekti.mjs (etarepoSallittu). Varmuuskopiot tehdään git bundlena
+# (node tools/varmuuskopio.mjs). Jos Node puuttuu, push estetään.
+command -v node >/dev/null 2>&1 || {
+  echo "ESTETTY: Node.js puuttuu, joten pushia ei voitu tarkistaa." >&2
+  exit 1
+}
+exec node tools/turvasaannot.mjs --push

@@ -1,0 +1,29 @@
+# Gitleaksin asetukset. Oletussäännöt ovat käytössä, ja niiden lisäksi alla on
+# muutama yleinen sääntö. Henkilötiedot ja koodisäännöt tarkistaa
+# tools/turvasaannot.mjs. Lisää projektin omat tunnisteet tähän loppuun.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "google-oauth-asiakassalaisuus"
+description = "Google OAuth -asiakassalaisuus"
+regex = '''GOCSPX-[A-Za-z0-9_-]{20,}'''
+keywords = ["gocspx-"]
+
+[[rules]]
+id = "asiakassalaisuus-arvona"
+description = "Rajapinnan tunniste tai asiakassalaisuus asetettuna arvoksi"
+regex = '''(?i)(API_TOKEN|ACCESS_TOKEN|CLIENT_SECRET)["']?\s*[:=]\s*["']?[A-Za-z0-9._~+/=-]{16,}'''
+keywords = ["api_token", "access_token", "client_secret"]
+
+[[rules]]
+id = "bearer-tunniste"
+description = "Kovakoodattu Bearer-tunniste"
+regex = '''(?i)bearer\s+[A-Za-z0-9._~+/-]{24,}=*'''
+keywords = ["bearer"]
+
+[[rules]]
+id = "palvelutilin-avain"
+description = "Palvelutilin yksityinen avain JSON-muodossa"
+regex = '''"private_key"\s*:\s*"-----BEGIN'''
+keywords = ["private_key"]

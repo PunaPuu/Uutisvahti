@@ -1,0 +1,14 @@
+#!/bin/sh
+# Tarkistaa commit-viestin: ei salaisuuksia eikä henkilötietoja.
+. "$(dirname "$0")/yhteiset.sh"
+
+vaadi_tyokalut
+viesti="$1"
+
+gitleaks stdin --redact --no-banner --log-level warn -c .gitleaks.toml < "$viesti" \
+  || virhe "commit-viestissä on salaisuudelta näyttävää."
+node tools/turvasaannot.mjs --viesti "$viesti" \
+  || virhe "commit-viestissä on henkilötietoja (lista yllä)."
+
+ketjuta_skanneriin commit-msg "$viesti"
+exit 0

@@ -1,0 +1,13 @@
+{
+  "name": "uutisvahti",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Azure, Microsoft 365 and Copilot news filter: hourly build to GitHub Pages with ntfy alerts.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node src/build.mjs",
+    "preview": "node scripts/preview.mjs",
+    "test": "node --test test/"
+  }
+}

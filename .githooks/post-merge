@@ -1,0 +1,8 @@
+#!/bin/sh
+# Yhdistämisen jälkeen main-haarasta tehdään varmuuskopio (git bundle).
+# Tämä hook ei voi estää mitään; virhe vain näytetään.
+haara=$(git symbolic-ref --short -q HEAD)
+if [ "$haara" = "main" ]; then
+  node tools/varmuuskopio.mjs || echo "VAROITUS: varmuuskopio epäonnistui (katso yllä). Aja: node tools/varmuuskopio.mjs" >&2
+fi
+exit 0
