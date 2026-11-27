@@ -8,6 +8,6 @@
   "scripts": {
     "build": "node src/build.mjs",
     "preview": "node scripts/preview.mjs",
-    "test": "node --test test/"
+    "test": "node --test \"test/*.test.mjs\""
   }
 }

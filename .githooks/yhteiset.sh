@@ -37,7 +37,10 @@ tarkista_lisattavat() {
 #     node_modules/.bin/oxlint $tiedostot >&2 || virhe "oxlint löysi virheitä."
 #   fi
 tarkista_projekti() {
-  :
+  tiedostot=$(git diff --cached --name-only --diff-filter=ACMR -- 'src/*.mjs' 'scripts/*.mjs' 'test/*.mjs' 'public/*.js')
+  if [ -n "$tiedostot" ]; then
+    node scripts/check-syntax.mjs >&2 || virhe "node --check löysi syntaksivirheitä."
+  fi
 }
 
 # Toinen suojakerros: SecurityScannerAppin git-vahti, joka on asennettu koneelle

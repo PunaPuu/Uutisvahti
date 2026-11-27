@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Uutisvahti</title>
+  <meta name="description" content="Azure, Microsoft 365 and Copilot news, filtered.">
+  <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111418" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Uutisvahti">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="titlebar">
+      <h1>Uutisvahti</h1>
+      <p class="updated" id="updated" aria-live="polite">Loading…</p>
+    </div>
+    <nav class="tabs" aria-label="View">
+      <button type="button" class="tab" data-view="all" aria-pressed="true">All</button>
+      <button type="button" class="tab" data-view="unread" aria-pressed="false">Unread <span class="count" id="unread-count"></span></button>
+      <button type="button" class="tab" data-view="saved" aria-pressed="false">Saved <span class="count" id="saved-count"></span></button>
+    </nav>
+    <div class="search">
+      <label class="visually-hidden" for="q">Search news</label>
+      <input id="q" type="search" placeholder="Search titles, summaries, services" autocomplete="off" enterkeyhint="search">
+    </div>
+    <div class="filters">
+      <div class="chips" id="product-chips" role="group" aria-label="Product"></div>
+      <div class="chips" id="status-chips" role="group" aria-label="Status"></div>
+    </div>
+  </header>
+
+  <main id="main">
+    <p class="notice" id="notice" hidden></p>
+    <div id="list"></div>
+    <button type="button" class="more" id="more" hidden>Show more</button>
+    <p class="empty" id="empty" hidden></p>
+  </main>
+
+  <footer class="foot">
+    <button type="button" class="link-button" id="mark-all">Mark all shown as read</button>
+    <p id="sources"></p>
+  </footer>
+</body>
+</html>
